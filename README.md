@@ -50,7 +50,7 @@ task myAwesomeFunJar(type: Autojar) {
         attributes('Created-By':'Gradle Autojar')
     }
 
-    // resource files must be manually added, they are resolved from the classpath for inclusion
+    // resource files must be manually added, resolved from the classpath for inclusion
     files = ['foo.txt', 'dir/foo2.txt']
 
     // additional classes can be manually added when they're not included automatically
@@ -60,12 +60,6 @@ task myAwesomeFunJar(type: Autojar) {
     autojarExtra = '-bav'
 }
 ```
-
-- [X] always with -b
-- [X] Javadoc GradleAutojarPlugin, etc.
-- [X] Maven `archives`, output of Autojar needs to be a File or an instance of a PublishArtifact
-- [X] write a proper README.md
-- [ ] add license for GPL + Apache 2.0
 
 ##License
 The `gradle-autojar` build plugin is released under version 2.0 of the [Apache
