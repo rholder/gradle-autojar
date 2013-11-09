@@ -1,0 +1,62 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'gradle-autojar'
+
+group = 'com.github.rholder'
+version = '0.0.1-SNAPSHOT'
+
+buildscript {
+    repositories {
+        //mavenCentral()
+        mavenLocal()
+    }
+    dependencies {
+        classpath 'com.github.rholder:gradle-autojar:1.0.0-SNAPSHOT'
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    oneJarLib
+} 
+
+dependencies {
+    compile "commons-lang:commons-lang:2.5"
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+task funJar(type: Autojar) {
+    mainClass = 'com.foo.Foo'
+
+    // manifest closure works just like the Jar task
+    manifest {
+        attributes('Created-By':'Gradle Autojar')
+    }
+
+    // resource files must be manually added, they are resolved from the classpath for inclusion
+    files = ['foo.txt', 'dir/foo2.txt']
+
+    // additional classes can be manually added when they're not included automatically
+    classes = ['org.apache.commons.lang.time.DateUtils']
+
+    // override the defaults of -ba
+    autojarExtra = '-bav'
+}
+
+artifacts {
+    archives jar
+    archives sourcesJar
+    archives funJar
+}
+
+// enable Gradle Wrapper support for bootstrapping with specific version
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.6'
+}
