@@ -8,15 +8,14 @@ based on reasonable defaults from the project and forks off a process to run
 ##What is Autojar?
 Here's a description of what `Autojar` does from the project page:
 ```
-`Autojar` creates jar archives of minimal size from different sources (classes,
+Autojar creates jar archives of minimal size from different sources (classes,
 directories, libraries). Starting from one or more classes, it scans the
 bytecode recursively for other classes, extracts them from their archives if
 necessary, and adds them to the output file. The resulting archive contains only
 classes that are really needed. Thus the size and loading time of applets can be
 kept low, and applications can be made self-contained.
 ```
-You can read more about `Autojar` [here](http://autojar.sourceforge.net/) as well
-as find the original source code.
+You can read more about `Autojar` [here](http://autojar.sourceforge.net/).
 
 ##Examples
 
@@ -60,6 +59,27 @@ task myAwesomeFunJar(type: Autojar) {
     autojarExtra = '-bav'
 }
 ```
+
+NOTE: This hasn't made it to Maven Central yet, but it's pretty close.
+
+##You probably don't need this
+This plugin is designed to output a minimized executable artifact. It is
+extraordinarily bad to use on a large, complicated project with only minimal
+or ad-hoc test coverage of the final deliverable. I wouldn't recommend using
+this for anything that resembles a regular deployment where development is
+ongoing or release cycles that are dependent on other upstream pieces of
+software that are outside of the original developers' control are involved.
+The consequences of missing a critical class that's only loaded during runtime
+usually isn't worth the tradeoff of a smaller final artifact size. There are
+better ways of rolling up a single artifact that can guarantee that all runtime
+dependencies stay intact (see [FatJAR](https://github.com/musketyr/gradle-fatjar-plugin)
+and [One-JAR](https://github.com/rholder/gradle-one-jar).
+
+##Fine, when SHOULD I use this?
+If you have a standalone utility that depends on only a limited subset of large
+and unwieldy libraries (like [fastutil](http://fastutil.di.unimi.it/) or the
+[AWS SDK for Java](http://aws.amazon.com/sdkforjava/) then this might be a
+reasonable artifact packaging solution.
 
 ##License
 The `gradle-autojar` build plugin is released under version 2.0 of the [Apache
