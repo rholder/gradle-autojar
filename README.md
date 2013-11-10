@@ -73,12 +73,12 @@ The consequences of missing a critical class that's only loaded during runtime
 usually isn't worth the tradeoff of a smaller final artifact size. There are
 better ways of rolling up a single artifact that can guarantee that all runtime
 dependencies stay intact (see [FatJAR](https://github.com/musketyr/gradle-fatjar-plugin)
-and [One-JAR](https://github.com/rholder/gradle-one-jar).
+and [One-JAR](https://github.com/rholder/gradle-one-jar)).
 
 ##Fine, when SHOULD I use this?
 If you have a standalone utility that depends on only a limited subset of large
 and unwieldy libraries (like [fastutil](http://fastutil.di.unimi.it/) or the
-[AWS SDK for Java](http://aws.amazon.com/sdkforjava/) then this might be a
+[AWS SDK for Java](http://aws.amazon.com/sdkforjava/)) then this might be a
 reasonable artifact packaging solution.
 
 ##License
