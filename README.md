@@ -60,8 +60,6 @@ task myAwesomeFunJar(type: Autojar) {
 }
 ```
 
-NOTE: This hasn't made it to Maven Central yet, but it's pretty close.
-
 ##You probably don't need this
 This plugin is designed to output a minimized executable artifact. It is
 extraordinarily bad to use on a large, complicated project with only minimal
