@@ -46,8 +46,8 @@ import org.gradle.api.Project
  *
  * task awesomeFunJar(type: Autojar) {
  *     mainClass = 'com.github.rholder.awesome.MyAwesomeMain'
- *     files = ['foo.txt', 'dir/foo2.txt']
- *     classes = ['org.apache.commons.lang.time.DateUtils']
+ *     autojarFiles = ['foo.txt', 'dir/foo2.txt']
+ *     autojarClasses = ['org.apache.commons.lang.time.DateUtils']
  * }
  * </pre>
  */

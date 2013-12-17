@@ -28,8 +28,11 @@ class ExtractAutojar extends DefaultTask {
     File extractedFile
 
     ExtractAutojar() {
-        extractedFile = new File(project.ext.autojarBuildDir, 'autojar-2.1.jar')
+        group = "Autojar"
         description = "Extract the runnable Autojar archive to the build directory."
+
+        extractedFile = new File(project.ext.autojarBuildDir, 'autojar-2.1.jar')
+
         dependsOn = [project.tasks.jar]
         outputs.file(extractedFile)
     }

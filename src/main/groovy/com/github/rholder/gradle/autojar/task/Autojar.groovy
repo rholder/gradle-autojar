@@ -17,17 +17,21 @@
 package com.github.rholder.gradle.autojar.task
 
 import org.gradle.api.InvalidUserDataException
+import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.PublishArtifact
-import org.gradle.api.internal.file.IdentityFileResolver
 import org.gradle.api.java.archives.Manifest
 import org.gradle.api.java.archives.internal.DefaultManifest
 import org.gradle.api.logging.Logger
 import org.gradle.api.tasks.JavaExec
+import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskDependency
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.util.ConfigureUtil
 
+/**
+ * This is the primary Task type used to create Autojar archives.
+ */
 class Autojar extends JavaExec implements PublishArtifact {
 
     Logger logger
@@ -38,8 +42,8 @@ class Autojar extends JavaExec implements PublishArtifact {
     Configuration targetConfiguration
 
     String mainClass
-    List<String> classes    // convert these to raw files
-    List<String> files      // all the class files, etc.
+    List<String> autojarClasses    // convert these to raw files
+    List<String> autojarFiles      // all the class files, etc.
 
     File autojarBuildDir
     String autojarExtra     // default to -bav
@@ -54,79 +58,70 @@ class Autojar extends JavaExec implements PublishArtifact {
     String publishExtension
 
     Autojar() {
-        logger = project.logger
         group = "Autojar"
         description = "Create an Autojar runnable archive from the current project using a given main class."
+
+        logger = project.logger
 
         autojarBuildDir = project.ext.autojarBuildDir
         extractAutojar = project.tasks.extractAutojar
 
-        // default to main project jar if none is specified
-        baseJar = baseJar ?: project.tasks.jar
+        // default to main project jar
+        baseJar = project.tasks.jar
+
+        autojarOutput = new File(autojarBuildDir, generateFilename(baseJar, "autojar"))
 
         dependsOn = [baseJar, extractAutojar]
+        inputs.files([baseJar.getArchivePath().absoluteFile, extractAutojar.extractedFile])
+        outputs.file(autojarOutput)
+    }
 
-        manifest = new DefaultManifest(new IdentityFileResolver())
+    @TaskAction
+    @Override
+    public void exec() {
+        setMain('org.sourceforge.autojar.Autojar')
+        classpath(extractAutojar.extractedFile.absolutePath)
 
-        // default to -ba if none is specified
-        autojarExtra = autojarExtra ?: "-ba"
+        // munge the autojarClasspath
+        autojarClasspath = baseJar.getArchivePath().absolutePath
 
         // default to runtime configuration if none is specified
         targetConfiguration = targetConfiguration ?: project.configurations.runtime
-
-        // munge the classpath
-        autojarClasspath = baseJar.getArchivePath().absolutePath
         def libs = targetConfiguration.resolve()
         libs.each {
             logger.debug("Including dependency: " + it.absolutePath)
             autojarClasspath += ":" + it.absolutePath
         }
 
-        autojarOutput = new File(autojarBuildDir, generateFilename(baseJar, "autojar"))
+        // default to -ba if none is specified
+        autojarExtra = autojarExtra ?: "-ba"
 
-        inputs.files([baseJar.getArchivePath().absoluteFile, extractAutojar.extractedFile])
-        outputs.file(autojarOutput)
-    }
-
-    /**
-     * Allow configuration view of a 'manifest' closure similar to the Jar task.
-     *
-     * @param configureClosure target closure
-     */
-    Autojar manifest(Closure configureClosure) {
-        manifest = manifest ?: new DefaultManifest(project.fileResolver)
-        ConfigureUtil.configure(configureClosure, manifest);
-        return this;
-    }
-
-    @Override
-    public void exec() {
-        setMain('org.sourceforge.autojar.Autojar')
-        classpath(extractAutojar.extractedFile.absolutePath)
-
-        files = files ?: []
+        autojarFiles = autojarFiles ?: []
 
         // convert class notation to raw files for Autojar
-        classes = classes ?: []
-        classes.each {
-            files.add(it.replaceAll("\\.", "/") + ".class")
+        autojarClasses = autojarClasses ?: []
+        autojarClasses.each {
+            autojarFiles.add(it.replaceAll("\\.", "/") + ".class")
         }
+
+        // default to whatever was in the manifest closure
+        manifest = manifest ?: new DefaultManifest(project.fileResolver)
 
         // infer main class starting point from manifest if it exists
         if(mainClass) {
-            files.add(mainClass.replaceAll("\\.", "/") + ".class")
+            autojarFiles.add(mainClass.replaceAll("\\.", "/") + ".class")
             manifest.attributes.put('Main-Class', mainClass)
         }
 
         // by now we should have at least one file
-        if(!files) {
+        if(!autojarFiles) {
             throw new InvalidUserDataException("No files set in autojarFiles and no main class to infer.")
         }
 
         autojarManifest = writeJarManifestFile(manifest).absolutePath
 
         def autojarArgs = [autojarExtra, "-c", autojarClasspath, "-m", autojarManifest,"-o", autojarOutput]
-        autojarArgs.addAll(files)
+        autojarArgs.addAll(autojarFiles)
         logger.info('{}', autojarArgs)
 
         args(autojarArgs)
@@ -160,7 +155,25 @@ class Autojar extends JavaExec implements PublishArtifact {
 
     @Override
     TaskDependency getBuildDependencies() {
-        return getTaskDependencies()
+        // we have to build ourself, since we're a Task
+        Task thisTask = this
+        return new TaskDependency() {
+            @Override
+            Set<? extends Task> getDependencies(Task task) {
+                return [thisTask] as Set
+            }
+        }
+    }
+
+    /**
+     * Allow configuration view of a 'manifest' closure similar to the Jar task.
+     *
+     * @param configureClosure target closure
+     */
+    Autojar manifest(Closure configureClosure) {
+        manifest = manifest ?: new DefaultManifest(project.fileResolver)
+        ConfigureUtil.configure(configureClosure, manifest);
+        return this;
     }
 
     /**
