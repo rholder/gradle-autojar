@@ -30,7 +30,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.github.rholder:gradle-autojar:1.0.0'
+        classpath 'com.github.rholder:gradle-autojar:1.0.1'
     }
 }
 
@@ -50,10 +50,10 @@ task myAwesomeFunJar(type: Autojar) {
     }
 
     // resource files must be manually added, resolved from the classpath for inclusion
-    files = ['foo.txt', 'dir/foo2.txt']
+    autojarFiles = ['foo.txt', 'dir/foo2.txt']
 
     // additional classes can be manually added when they're not included automatically
-    classes = ['org.apache.commons.lang.time.DateUtils']
+    autojarClasses = ['org.apache.commons.lang.time.DateUtils']
 
     // override the defaults of -ba
     autojarExtra = '-bav'
