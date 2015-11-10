@@ -90,7 +90,7 @@ class Autojar extends JavaExec implements PublishArtifact {
         def libs = targetConfiguration.resolve()
         libs.each {
             logger.debug("Including dependency: " + it.absolutePath)
-            autojarClasspath += ":" + it.absolutePath
+            autojarClasspath += java.io.File.pathSeparatorChar + it.absolutePath
         }
 
         // default to -ba if none is specified
