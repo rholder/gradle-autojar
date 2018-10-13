@@ -11,7 +11,7 @@ buildscript {
         mavenLocal()
     }
     dependencies {
-        classpath 'com.github.rholder:gradle-autojar:1.0.1-SNAPSHOT'
+        classpath 'com.github.rholder:gradle-autojar:1.0.2-SNAPSHOT'
     }
 }
 
@@ -60,5 +60,5 @@ artifacts {
 
 // enable Gradle Wrapper support for bootstrapping with specific version
 task wrapper(type: Wrapper) {
-    gradleVersion = '1.9'
+    gradleVersion = '4.4.1'
 }
