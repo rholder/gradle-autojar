@@ -177,16 +177,13 @@ class Autojar extends JavaExec implements PublishArtifact {
     }
 
     /**
-     * Return a manifest configured to boot the jar using One-JAR and then
-     * passing over control to the configured main class.
+     * Return a manifest file set up to work with Autojar.
      */
     static File writeJarManifestFile(Manifest manifest) {
         File manifestFile = File.createTempFile("manifest", ".mf")
         manifestFile.deleteOnExit()
 
-        manifestFile.withWriter { writer ->
-            manifest.writeTo(writer)
-        }
+        manifest.writeTo(manifestFile.path)
 
         // hack to clip off the first line, Manifest-Version, in the file because Autojar is weird
         def lines = manifestFile.readLines()
